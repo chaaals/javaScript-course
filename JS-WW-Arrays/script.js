@@ -572,8 +572,8 @@ console.log(movements.every(mov => mov > 0));
 
 // separate callback
 
-const deposit = mov => mov > 0; // you can make a separate callback function then put it as a parameter in the array method. It helps with keeping the codebase DRY (don't repeat yourself)
-console.log(movements.filter(deposit));
+// const deposit = mov => mov > 0; // you can make a separate callback function then put it as a parameter in the array method. It helps with keeping the codebase DRY (don't repeat yourself)
+// console.log(movements.filter(deposit));
 
 // -------------------------------------------------------------------------
 // flat and flatmap method => ES2019
@@ -601,3 +601,163 @@ const fmOverAllBalance = accounts
   .reduce((acc, cur) => acc + cur, 0);
 
 console.log(fmOverAllBalance);
+
+// -----------------------------------------------------------------
+
+// Additional Notes: How to programatically create arrays
+
+// Empty arrays + fill method
+const x = new Array(7); // creates an array with a size of 7 that doesn't have elements
+
+// FILL method
+// fill method format: arr.fill(val,start,end) where start and end are indices. it's similar to how slice() works.
+x.fill(1, 3);
+
+console.log(x);
+
+// Array.from function. Array is a function and .from() is a method.
+// Array.from format: Array.from({length: val}, () => ...)
+
+const y = Array.from({ length: 7 }, () => 1);
+console.log(y);
+
+const z = Array.from({ length: 7 }, (_, i) => i + 1);
+console.log(z);
+
+// practice
+const diceRolls = Array.from({ length: 100 }, () =>
+  Math.trunc(Math.random() * 6 + 1)
+);
+console.log(diceRolls);
+
+// real usecase of Array.from(): turning a NodeList from querySelectorAll to an array.
+
+labelBalance.addEventListener('click', function () {
+  const movementsUI = Array.from(
+    document.querySelectorAll('.movements__value'),
+    el => Number(el.textContent.replace('€', ''))
+  );
+
+  console.log(movementsUI);
+});
+
+// ---------------------------------------------------------------------
+// SUMMARY: Which array method to use
+// lectures on course material
+
+// ---------------------------------------------------------------------
+
+// Array Methods Practice
+// 1.
+const bankDepositSum = accounts
+  .flatMap(accnt => accnt.movements)
+  .filter(deposit => deposit > 0)
+  .reduce((acc, cur) => acc + cur);
+
+console.log(bankDepositSum);
+
+// 2
+// const numDeposits1000 = accounts
+//   .flatMap(account => account.movements)
+//   .filter(deposit => deposit >= 1000).length;
+
+const numDeposits1000 = accounts
+  .flatMap(account => account.movements)
+  .reduce((num, curr) => (curr >= 1000 ? (num += 1) : num), 0);
+
+console.log(numDeposits1000);
+
+// 3
+// create an object using reduce method
+const { dpsts, wthdrwls } = accounts
+  .flatMap(acc => acc.movements)
+  .reduce(
+    (sums, cur) => {
+      // cur > 0 ? (sums.dpsts += cur) : (sums.wthdrwls += cur);
+      sums[cur > 0 ? `dpsts` : `wthdrwls`] += cur;
+      return sums;
+    },
+    { dpsts: 0, wthdrwls: 0 }
+  );
+
+console.log(dpsts, wthdrwls);
+
+// 4
+// this is a nice title -> This Is a Nice Title
+
+const convertTitleCase = function (title) {
+  const capitalize = str => str[0].toUpperCase() + str.slice(1);
+
+  const exceptions = ['a', 'an', 'the', 'but', 'or', 'on', 'in', 'with'];
+  const newTitleCase = title
+    .toLowerCase()
+    .split(' ')
+    .map(word =>
+      exceptions.includes(word) ? word : word[0].toUpperCase() + word.slice(1)
+    )
+    .join(' ');
+
+  return capitalize(newTitleCase);
+};
+
+console.log(convertTitleCase('this is a nice title'));
+console.log(convertTitleCase('this is a LONG title but not too long'));
+
+// Final Coding Challenge
+// eating too much = food portion is larger then recc
+// eating too little = opposite
+// eating okay is within a range of above 10% and below 10%
+
+const dogs = [
+  { weight: 22, curFood: 250, owners: ['Alice', 'Bob'] },
+  { weight: 8, curFood: 200, owners: ['Matilda'] },
+  { weight: 13, curFood: 275, owners: ['Sarah', 'John'] },
+  { weight: 32, curFood: 340, owners: ['Michael'] },
+];
+
+dogs.forEach(function (dog) {
+  const recommendedFood = dog.weight ** 0.75 * 28;
+  dog[`recFood`] = Math.trunc(recommendedFood);
+});
+
+// console.log(dogs);
+
+const owner__Sarah = dogs.find(dog => dog.owners.includes('Sarah'));
+console.log(
+  owner__Sarah.curFood > owner__Sarah.recFood
+    ? `Sarah's dog is eating too much`
+    : `Sarah's dog is eating too little`
+);
+
+const allDogsCurFood = dogs.map(dog => dog.curFood);
+const allDogsRecFood = dogs.map(dog => dog.recFood);
+
+const ownersEatTooMuch = dogs
+  .filter(dog => dog.curFood > dog.recFood)
+  .flatMap(dog => dog.owners);
+
+const ownersEatTooLittle = dogs
+  .filter(dog => dog.curFood < dog.recFood)
+  .flatMap(dog => dog.owners);
+
+console.log(`${ownersEatTooMuch.join(' and ')}'s dogs eat too much!`);
+console.log(`${ownersEatTooLittle.join(' and ')}'s dogs eat too little!`);
+
+// const dogsEatExact = allDogsCurFood.reduce(
+//   (curFood, i) => curFood === allDogsRecFood[i]
+// );
+
+console.log(dogs.some(dog => dog.curFood === dog.recFood));
+
+const eatOkay = dog =>
+  dog.curFood > dog.recFood * 0.9 && dog.curFood < dog.recFood * 1.1;
+
+console.log(dogs.some(eatOkay));
+console.log(dogs.filter(eatOkay));
+
+const sortedDogs = dogs.slice().sort((a, b) => a.recFood - b.recFood);
+
+console.log(dogs);
+console.log(sortedDogs);
+
+// ---------------------------------- END for Arrays ---------------------
